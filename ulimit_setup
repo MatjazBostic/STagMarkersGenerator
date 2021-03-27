@@ -1,0 +1,85 @@
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]
+then 
+    echo "Please run as root."
+    exit
+fi
+
+if grep -Fq "fs.file-max" /etc/sysctl.conf
+then
+    echo -n "Limit in /etc/sysctl.conf already set to: " 
+    cat /proc/sys/fs/file-max
+else
+    echo "fs.file-max = 65535" >> /etc/sysctl.conf
+    # Reload the changed file
+    sysctl -p
+fi
+
+# Arbitrary user
+if grep -Fq "* soft nproc" /etc/security/limits.conf
+then   
+    echo "Soft limit in /etc/security/limits.conf for number of processes already set (You might have to change it mannualy to 65535)"
+else
+    echo "* soft nproc 65535" >> /etc/security/limits.conf
+fi
+
+if grep -Fq "* hard nproc" /etc/security/limits.conf
+then   
+    echo "Hard limit in /etc/security/limits.conf for number of processes already set (You might have to change it mannualy to 65535)"
+else
+    echo "* hard nproc 65535" >> /etc/security/limits.conf
+fi
+
+if grep -Fq "* soft nofile" /etc/security/limits.conf
+then   
+    echo "Soft limit in /etc/security/limits.conf for number of files already set (You might have to change it mannualy to 65535)"
+else
+    echo "* soft nofile 65535" >> /etc/security/limits.conf
+fi
+
+if grep -Fq "* hard nofile" /etc/security/limits.conf
+then   
+    echo "Hard limit in /etc/security/limits.conf for number of files already set (You might have to change it mannualy to 65535)"
+else
+    echo "* hard nofile 65535" >> /etc/security/limits.conf
+fi
+
+# Set the same for root user
+if grep -Fq "root soft nproc" /etc/security/limits.conf
+then   
+    echo "Soft limit in /etc/security/limits.conf for number of processes already set (You might have to change it mannualy to 65535)"
+else
+    echo "root soft nproc 65535" >> /etc/security/limits.conf
+fi
+
+if grep -Fq "root hard nproc" /etc/security/limits.conf
+then   
+    echo "Hard limit in /etc/security/limits.conf for number of processes already set (You might have to change it mannualy to 65535)"
+else
+    echo "root hard nproc 65535" >> /etc/security/limits.conf
+fi
+
+if grep -Fq "root soft nofile" /etc/security/limits.conf
+then   
+    echo "Soft limit in /etc/security/limits.conf for number of files already set (You might have to change it mannualy to 65535)"
+else
+    echo "root soft nofile 65535" >> /etc/security/limits.conf
+fi
+
+if grep -Fq "root hard nofile" /etc/security/limits.conf
+then   
+    echo "Hard limit in /etc/security/limits.conf for number of files already set (You might have to change it mannualy to 65535)"
+else
+    echo "root hard nofile 65535" >> /etc/security/limits.conf
+fi
+
+# Session settings
+if grep -Fxq "session required pam_limits.so" /etc/pam.d/common-session
+then
+     echo "Session in /etc/pam.d/common-session already set."
+else
+     echo "session required pam_limits.so" >> /etc/pam.d/common-session
+fi
+
+echo "Re-open the current terminal - for the changes to take place."
